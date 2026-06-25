@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ariadne.Application\Ariadne.Application.csproj" />
+  </ItemGroup>
+
 </Project>

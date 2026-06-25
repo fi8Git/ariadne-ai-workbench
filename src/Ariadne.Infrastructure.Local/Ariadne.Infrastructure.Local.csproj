@@ -1,5 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ariadne.Domain\Ariadne.Domain.csproj" />
+    <ProjectReference Include="..\Ariadne.Application\Ariadne.Application.csproj" />
+    <ProjectReference Include="..\Ariadne.Analytics\Ariadne.Analytics.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
