@@ -1,0 +1,16 @@
+{
+  "solution": {
+    "path": "Ariadne.sln",
+    "projects": [
+      "src\\Ariadne.Domain\\Ariadne.Domain.csproj",
+      "src\\Ariadne.Application\\Ariadne.Application.csproj",
+      "src\\Ariadne.Analytics\\Ariadne.Analytics.csproj",
+      "src\\Ariadne.Infrastructure.Local\\Ariadne.Infrastructure.Local.csproj",
+      "src\\Ariadne.SharedUi\\Ariadne.SharedUi.csproj",
+      "tests\\Ariadne.Domain.Tests\\Ariadne.Domain.Tests.csproj",
+      "tests\\Ariadne.Application.Tests\\Ariadne.Application.Tests.csproj",
+      "tests\\Ariadne.Analytics.Tests\\Ariadne.Analytics.Tests.csproj",
+      "tests\\Ariadne.Infrastructure.Local.Tests\\Ariadne.Infrastructure.Local.Tests.csproj"
+    ]
+  }
+}

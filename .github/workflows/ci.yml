@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+  push:
     branches:
       - main
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   non-maui-build-and-test:
-    name: Non-MAUI build and tests
+    name: Non-MAUI .NET build and tests
     runs-on: ubuntu-latest
 
     env:
@@ -30,29 +30,11 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore non-MAUI projects
-        run: |
-          dotnet restore src/Ariadne.Domain/Ariadne.Domain.csproj
-          dotnet restore src/Ariadne.Application/Ariadne.Application.csproj
-          dotnet restore src/Ariadne.Analytics/Ariadne.Analytics.csproj
-          dotnet restore src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj
-          dotnet restore src/Ariadne.SharedUi/Ariadne.SharedUi.csproj
-          dotnet restore tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj
-          dotnet restore tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj
-          dotnet restore tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj
-          dotnet restore tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj
+      - name: Restore
+        run: dotnet restore Ariadne.NonMaui.slnf
 
-      - name: Build non-MAUI projects
-        run: |
-          dotnet build src/Ariadne.Domain/Ariadne.Domain.csproj --configuration Release --no-restore
-          dotnet build src/Ariadne.Application/Ariadne.Application.csproj --configuration Release --no-restore
-          dotnet build src/Ariadne.Analytics/Ariadne.Analytics.csproj --configuration Release --no-restore
-          dotnet build src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj --configuration Release --no-restore
-          dotnet build src/Ariadne.SharedUi/Ariadne.SharedUi.csproj --configuration Release --no-restore
+      - name: Build
+        run: dotnet build Ariadne.NonMaui.slnf --configuration Release --no-restore
 
       - name: Run tests
-        run: |
-          dotnet test tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj --configuration Release --no-restore
-          dotnet test tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj --configuration Release --no-restore
-          dotnet test tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj --configuration Release --no-restore
-          dotnet test tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj --configuration Release --no-restore
+        run: dotnet test Ariadne.NonMaui.slnf --configuration Release --no-build --verbosity normal

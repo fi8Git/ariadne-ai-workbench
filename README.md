@@ -119,12 +119,18 @@ If MAUI workloads are not installed, validate the non-MAUI projects that exist a
 
 ## Continuous Integration
 
-The initial GitHub Actions workflow validates non-MAUI projects on Ubuntu:
+The initial GitHub Actions workflow validates a non-MAUI solution filter on Ubuntu:
 
-- restore/build for Domain, Application, Analytics, Infrastructure.Local and SharedUi;
+- restore/build for Domain, Application, Analytics, Infrastructure.Local and SharedUi through `Ariadne.NonMaui.slnf`;
 - tests for the four xUnit test projects.
 
 The MAUI host is not built in CI yet because MAUI workloads require additional platform setup. Full MAUI validation remains a local or future CI enhancement.
+
+## Security
+
+Please report vulnerabilities privately. Do not open public issues with secrets, tokens, sensitive datasets, generated reports containing private data or exploitable vulnerability details.
+
+See [`SECURITY.md`](SECURITY.md) for reporting guidance and local-first data handling expectations.
 
 ## Contributor Guidance
 
