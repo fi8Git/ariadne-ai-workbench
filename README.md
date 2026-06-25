@@ -8,9 +8,9 @@ The first goal is not AutoML, model training, cloud collaboration or LLM automat
 
 ## Status
 
-Current status: documentation baseline / pre-MVP planning.
+Current status: solution skeleton / pre-MVP foundation.
 
-The .NET solution has not been created yet. The next implementation milestone is the initial .NET 10 MAUI Blazor Hybrid solution skeleton.
+The initial .NET 10 solution and project structure exist. The next milestones add domain foundations, application use cases, reusable UI and local storage.
 
 ## Why Ariadne Exists
 
@@ -105,11 +105,9 @@ Read only the documents relevant to the task at hand.
 | [`docs/09-codex-task-breakdown.md`](docs/09-codex-task-breakdown.md) | Codex-ready task breakdown and execution prompts. |
 | [`AGENTS.md`](AGENTS.md) | Always-on guidance for Codex and contributors. |
 
-## Development Placeholder
+## Development
 
-Until `Ariadne.sln` exists, the commands below describe the intended workflow rather than the current repository state.
-
-Once the solution skeleton exists:
+Local development uses the solution at `Ariadne.sln`:
 
 ```bash
 dotnet restore Ariadne.sln
@@ -118,6 +116,15 @@ dotnet test Ariadne.sln
 ```
 
 If MAUI workloads are not installed, validate the non-MAUI projects that exist and report the limitation clearly.
+
+## Continuous Integration
+
+The initial GitHub Actions workflow validates non-MAUI projects on Ubuntu:
+
+- restore/build for Domain, Application, Analytics, Infrastructure.Local and SharedUi;
+- tests for the four xUnit test projects.
+
+The MAUI host is not built in CI yet because MAUI workloads require additional platform setup. Full MAUI validation remains a local or future CI enhancement.
 
 ## Contributor Guidance
 

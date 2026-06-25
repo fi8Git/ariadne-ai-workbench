@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  non-maui-build-and-test:
+    name: Non-MAUI build and tests
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore non-MAUI projects
+        run: |
+          dotnet restore src/Ariadne.Domain/Ariadne.Domain.csproj
+          dotnet restore src/Ariadne.Application/Ariadne.Application.csproj
+          dotnet restore src/Ariadne.Analytics/Ariadne.Analytics.csproj
+          dotnet restore src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj
+          dotnet restore src/Ariadne.SharedUi/Ariadne.SharedUi.csproj
+          dotnet restore tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj
+          dotnet restore tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj
+          dotnet restore tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj
+          dotnet restore tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj
+
+      - name: Build non-MAUI projects
+        run: |
+          dotnet build src/Ariadne.Domain/Ariadne.Domain.csproj --configuration Release --no-restore
+          dotnet build src/Ariadne.Application/Ariadne.Application.csproj --configuration Release --no-restore
+          dotnet build src/Ariadne.Analytics/Ariadne.Analytics.csproj --configuration Release --no-restore
+          dotnet build src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj --configuration Release --no-restore
+          dotnet build src/Ariadne.SharedUi/Ariadne.SharedUi.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: |
+          dotnet test tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj --configuration Release --no-restore
+          dotnet test tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj --configuration Release --no-restore
+          dotnet test tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj --configuration Release --no-restore
+          dotnet test tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj --configuration Release --no-restore
