@@ -24,6 +24,7 @@ public class CoreEnumTests
         Assert.Equal(0, (int)DataSourceKind.Unknown);
         Assert.Equal(0, (int)DecisionEntryType.Note);
         Assert.Equal(0, (int)DecisionStatus.Open);
+        Assert.Equal(0, (int)DecisionImpact.Unknown);
         Assert.Equal(0, (int)KnowledgeStatus.Unknown);
         Assert.Equal(0, (int)FundamentalQuestionGroup.What);
         Assert.Equal(0, (int)ReportFormat.Markdown);
