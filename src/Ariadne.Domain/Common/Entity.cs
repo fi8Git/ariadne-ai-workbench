@@ -8,7 +8,7 @@ public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>> where TId : 
         => other is not null && EqualityComparer<TId>.Default.Equals(Id, other.Id);
 
     public override bool Equals(object? obj)
-        => obj is Entity<TId> other && Equals(other);
+        => obj is not null && obj.GetType() == GetType() && Equals((Entity<TId>)obj);
 
     public override int GetHashCode()
         => EqualityComparer<TId>.Default.GetHashCode(Id);
