@@ -8,9 +8,9 @@ The first goal is not AutoML, model training, cloud collaboration or LLM automat
 
 ## Status
 
-Current status: solution skeleton / pre-MVP foundation.
+Current status: domain/application foundation hardening.
 
-The initial .NET 10 solution and project structure exist. The next milestones add domain foundations, application use cases, reusable UI and local storage.
+The initial .NET 10 solution exists. M02 domain foundations and application result conventions are in place; the next milestones add the reusable UI shell, MAUI host wiring, local storage and application use cases.
 
 ## Why Ariadne Exists
 
