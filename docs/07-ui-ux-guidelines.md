@@ -1535,7 +1535,7 @@ No cloud sync enabled
 When useful, show project location:
 
 ```text
-Project folder: /Users/julien/Ariadne/Projects/HousePrices
+Project folder: <Ariadne data root>/projects/HousePrices
 ```
 
 Do not overload every screen with path details.
