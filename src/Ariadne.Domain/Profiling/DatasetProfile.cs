@@ -17,7 +17,7 @@ public sealed class DatasetProfile : AggregateRoot<ProfileRunId>
         IReadOnlyCollection<ColumnProfile> columns,
         IReadOnlyCollection<ParsingWarning> warnings,
         long? duplicateRowCount)
-        : base(id)
+        : base(DomainGuard.EnsureNotDefaultId(id, id.Value, "Profile run ID is required."))
     {
         DatasetVersionId = datasetVersionId;
         CreatedAtUtc = createdAtUtc;
@@ -72,6 +72,10 @@ public sealed class DatasetProfile : AggregateRoot<ProfileRunId>
         if (duplicateRowCount < 0)
             throw new DomainException("Duplicate row count must be non-negative.");
 
+        DomainGuard.EnsureNotDefaultId(id, id.Value, "Profile run ID is required.");
+        DomainGuard.EnsureNotDefaultId(datasetVersionId, datasetVersionId.Value, "Dataset version ID is required.");
+        createdAtUtc = DomainGuard.EnsureUtc(createdAtUtc, nameof(createdAtUtc));
+
         ColumnProfile[] columnArray = columns?.ToArray()
             ?? throw new DomainException("Dataset profile columns are required.");
 
@@ -91,13 +95,15 @@ public sealed class DatasetProfile : AggregateRoot<ProfileRunId>
 
         decimal totalCellCount = (decimal)rowCount * columnCount;
 
-        if (totalCellCount > 0 && totalMissingCells > totalCellCount)
+        if (totalMissingCells > totalCellCount)
             throw new DomainException("Dataset profile missing cell count cannot exceed total cell count.");
 
         ParsingWarning[] warningArray = warnings?.ToArray() ?? [];
 
         if (warningArray.Any(warning => warning is null))
             throw new DomainException("Dataset profile warnings must not contain null entries.");
+
+        Ratio computedMissingCellRatio = ComputeMissingCellRatio(totalMissingCells, totalCellCount);
 
         return new DatasetProfile(
             id,
@@ -106,9 +112,14 @@ public sealed class DatasetProfile : AggregateRoot<ProfileRunId>
             rowCount,
             columnCount,
             totalMissingCells,
-            missingCellRatio,
+            computedMissingCellRatio,
             columnArray,
             warningArray,
             duplicateRowCount);
     }
+
+    private static Ratio ComputeMissingCellRatio(long totalMissingCells, decimal totalCellCount)
+        => totalCellCount == 0
+            ? Ratio.Zero
+            : new Ratio((double)((decimal)totalMissingCells / totalCellCount));
 }

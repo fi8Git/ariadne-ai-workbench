@@ -7,6 +7,7 @@ namespace Ariadne.Domain.Tests.Datasets;
 public class DatasetVersionTests
 {
     private static readonly DateTimeOffset ImportedAt = new(2026, 6, 29, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtcImportedAt = new(2026, 6, 29, 10, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateWithValidDataStoresVersionMetadata()
@@ -41,6 +42,42 @@ public class DatasetVersionTests
     {
         Assert.Throws<DomainException>(
             () => CreateVersion(versionNumber: versionNumber));
+    }
+
+    [Fact]
+    public void CreateWithDefaultVersionIdThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => new DatasetVersion(
+                default,
+                DatasetId.New(),
+                1,
+                ImportedAt,
+                CreateFileReference()));
+    }
+
+    [Fact]
+    public void CreateWithDefaultDatasetIdThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => new DatasetVersion(
+                DatasetVersionId.New(),
+                default,
+                1,
+                ImportedAt,
+                CreateFileReference()));
+    }
+
+    [Fact]
+    public void CreateWithNonUtcImportedAtThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => new DatasetVersion(
+                DatasetVersionId.New(),
+                DatasetId.New(),
+                1,
+                NonUtcImportedAt,
+                CreateFileReference()));
     }
 
     [Fact]

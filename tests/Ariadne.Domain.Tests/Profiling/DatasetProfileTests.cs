@@ -8,6 +8,7 @@ namespace Ariadne.Domain.Tests.Profiling;
 public class DatasetProfileTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 29, 14, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtcCreatedAt = new(2026, 6, 29, 14, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateWithValidDataStoresProfileMetadata()
@@ -45,6 +46,51 @@ public class DatasetProfileTests
     {
         Assert.Throws<DomainException>(
             () => CreateProfile(rowCount: -1));
+    }
+
+    [Fact]
+    public void CreateRejectsDefaultProfileRunId()
+    {
+        Assert.Throws<DomainException>(
+            () => DatasetProfile.Create(
+                default,
+                DatasetVersionId.New(),
+                CreatedAt,
+                rowCount: 1,
+                columnCount: 1,
+                totalMissingCells: 0,
+                missingCellRatio: Ratio.Zero,
+                columns: [ColumnProfileTests.CreateTextColumn()]));
+    }
+
+    [Fact]
+    public void CreateRejectsDefaultDatasetVersionId()
+    {
+        Assert.Throws<DomainException>(
+            () => DatasetProfile.Create(
+                ProfileRunId.New(),
+                default,
+                CreatedAt,
+                rowCount: 1,
+                columnCount: 1,
+                totalMissingCells: 0,
+                missingCellRatio: Ratio.Zero,
+                columns: [ColumnProfileTests.CreateTextColumn()]));
+    }
+
+    [Fact]
+    public void CreateRejectsNonUtcTimestamp()
+    {
+        Assert.Throws<DomainException>(
+            () => DatasetProfile.Create(
+                ProfileRunId.New(),
+                DatasetVersionId.New(),
+                NonUtcCreatedAt,
+                rowCount: 1,
+                columnCount: 1,
+                totalMissingCells: 0,
+                missingCellRatio: Ratio.Zero,
+                columns: [ColumnProfileTests.CreateTextColumn()]));
     }
 
     [Fact]
@@ -100,6 +146,54 @@ public class DatasetProfileTests
     {
         Assert.Throws<DomainException>(
             () => CreateProfile(rowCount: 1, columnCount: 1, totalMissingCells: 2));
+    }
+
+    [Fact]
+    public void CreateRecalculatesMissingCellRatioFromCounts()
+    {
+        DatasetProfile profile = CreateProfile(
+            rowCount: 10,
+            columnCount: 2,
+            totalMissingCells: 5,
+            missingCellRatio: Ratio.Zero,
+            columns:
+            [
+                ColumnProfileTests.CreateTextColumn(new ColumnName("city")),
+                ColumnProfileTests.CreateNumericColumn(new ColumnName("price")),
+            ]);
+
+        Assert.Equal(0.25, profile.MissingCellRatio.Value);
+    }
+
+    [Fact]
+    public void CreateWithNoCellsStoresZeroMissingCellRatio()
+    {
+        DatasetProfile profile = DatasetProfile.Create(
+            ProfileRunId.New(),
+            DatasetVersionId.New(),
+            CreatedAt,
+            rowCount: 0,
+            columnCount: 0,
+            totalMissingCells: 0,
+            missingCellRatio: Ratio.One,
+            columns: []);
+
+        Assert.Equal(Ratio.Zero, profile.MissingCellRatio);
+    }
+
+    [Fact]
+    public void CreateRejectsMissingCellsWhenDatasetHasNoCells()
+    {
+        Assert.Throws<DomainException>(
+            () => DatasetProfile.Create(
+                ProfileRunId.New(),
+                DatasetVersionId.New(),
+                CreatedAt,
+                rowCount: 0,
+                columnCount: 0,
+                totalMissingCells: 1,
+                missingCellRatio: Ratio.Zero,
+                columns: []));
     }
 
     [Fact]

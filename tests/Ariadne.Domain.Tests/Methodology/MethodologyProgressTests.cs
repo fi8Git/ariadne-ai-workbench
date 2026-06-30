@@ -6,6 +6,7 @@ namespace Ariadne.Domain.Tests.Methodology;
 public class MethodologyProgressTests
 {
     private static readonly DateTimeOffset Now = new(2026, 6, 26, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtcNow = new(2026, 6, 26, 12, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateForMvpInitializesAllDocumentedSteps()
@@ -53,6 +54,28 @@ public class MethodologyProgressTests
                     new MethodologyStepProgress(MethodologyStep.Project, MethodologyStepStatus.NotStarted, Now),
                     new MethodologyStepProgress(MethodologyStep.Project, MethodologyStepStatus.Completed, Now, Now),
                 ]));
+    }
+
+    [Fact]
+    public void CreateForMvpWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(() => MethodologyProgress.CreateForMvp(NonUtcNow));
+    }
+
+    [Fact]
+    public void WithStatusWithNonUtcTimestampThrowsDomainException()
+    {
+        MethodologyProgress progress = MethodologyProgress.CreateForMvp(Now);
+
+        Assert.Throws<DomainException>(
+            () => progress.WithStatus(MethodologyStep.Dataset, MethodologyStepStatus.InProgress, NonUtcNow));
+    }
+
+    [Fact]
+    public void StepProgressWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => new MethodologyStepProgress(MethodologyStep.Project, MethodologyStepStatus.NotStarted, NonUtcNow));
     }
 
     [Fact]

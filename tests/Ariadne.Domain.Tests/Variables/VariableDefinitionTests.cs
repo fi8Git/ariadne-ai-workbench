@@ -8,6 +8,7 @@ namespace Ariadne.Domain.Tests.Variables;
 public class VariableDefinitionTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 29, 15, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtc = new(2026, 6, 29, 15, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void FromColumnProfileStartsAsNeedsReviewWithInferredValues()
@@ -34,6 +35,15 @@ public class VariableDefinitionTests
     public void FromColumnProfileRequiresProfile()
     {
         Assert.Throws<DomainException>(() => VariableDefinition.FromColumnProfile(null!, CreatedAt));
+    }
+
+    [Fact]
+    public void FromColumnProfileWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => VariableDefinition.FromColumnProfile(
+                ColumnProfileTests.CreateNumericColumn(new ColumnName("price")),
+                NonUtc));
     }
 
     [Fact]
@@ -211,6 +221,17 @@ public class VariableDefinitionTests
         Assert.Null(variable.DisplayName);
         Assert.Equal("Reviewed meaning.", variable.Description);
         Assert.Equal(CreatedAt.AddMinutes(2), variable.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void UpdateWithNonUtcTimestampThrowsDomainExceptionAndLeavesStateUnchanged()
+    {
+        VariableDefinition variable = CreateVariable();
+
+        Assert.Throws<DomainException>(() => variable.ChangeDescription("Meaning.", NonUtc.AddMinutes(1)));
+
+        Assert.Null(variable.Description);
+        Assert.Equal(CreatedAt, variable.UpdatedAtUtc);
     }
 
     private static VariableDefinition CreateVariable()

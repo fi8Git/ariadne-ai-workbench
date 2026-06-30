@@ -8,6 +8,7 @@ namespace Ariadne.Domain.Tests.Projects;
 public class AiProjectTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 26, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtc = new(2026, 6, 26, 12, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateWithValidDataInitializesProject()
@@ -39,6 +40,20 @@ public class AiProjectTests
     {
         Assert.Throws<DomainException>(
             () => AiProject.Create(ProjectId.New(), new ProjectName(" "), CreatedAt));
+    }
+
+    [Fact]
+    public void CreateWithDefaultProjectIdThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => AiProject.Create(default, new ProjectName("Housing Study"), CreatedAt));
+    }
+
+    [Fact]
+    public void CreateWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => AiProject.Create(ProjectId.New(), new ProjectName("Housing Study"), NonUtc));
     }
 
     [Fact]
@@ -107,6 +122,14 @@ public class AiProjectTests
     }
 
     [Fact]
+    public void AttachDatasetWithDefaultDatasetIdThrowsDomainException()
+    {
+        AiProject project = CreateProject();
+
+        Assert.Throws<DomainException>(() => project.AttachDataset(default, CreatedAt.AddMinutes(10)));
+    }
+
+    [Fact]
     public void SetActiveDatasetVersionStoresVersionAndAdvancesDatasetStep()
     {
         AiProject project = CreateProject();
@@ -118,6 +141,14 @@ public class AiProjectTests
         Assert.Equal(versionId, project.ActiveDatasetVersionId);
         Assert.Equal(updatedAt, project.UpdatedAtUtc);
         Assert.Equal(MethodologyStepStatus.InProgress, project.Progress[MethodologyStep.Dataset].Status);
+    }
+
+    [Fact]
+    public void SetActiveDatasetVersionWithDefaultVersionIdThrowsDomainException()
+    {
+        AiProject project = CreateProject();
+
+        Assert.Throws<DomainException>(() => project.SetActiveDatasetVersion(default, CreatedAt.AddMinutes(10)));
     }
 
     [Fact]
@@ -143,6 +174,30 @@ public class AiProjectTests
 
         Assert.Equal("Housing Study", project.Name.Value);
         Assert.Equal(CreatedAt, project.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void UpdateRejectsTimestampBeforeCurrentUpdatedAt()
+    {
+        AiProject project = CreateProject();
+        project.ChangeDescription("First update.", CreatedAt.AddMinutes(10));
+
+        Assert.Throws<DomainException>(
+            () => project.Rename(new ProjectName("Older update"), CreatedAt.AddMinutes(5)));
+
+        Assert.Equal("Housing Study", project.Name.Value);
+        Assert.Equal(CreatedAt.AddMinutes(10), project.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void UpdateWithNonUtcTimestampThrowsDomainException()
+    {
+        AiProject project = CreateProject();
+
+        Assert.Throws<DomainException>(
+            () => project.Rename(new ProjectName("Non UTC"), NonUtc.AddMinutes(10)));
+
+        Assert.Equal("Housing Study", project.Name.Value);
     }
 
     [Fact]

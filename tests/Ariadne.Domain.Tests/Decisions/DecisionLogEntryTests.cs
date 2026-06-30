@@ -7,6 +7,7 @@ namespace Ariadne.Domain.Tests.Decisions;
 public class DecisionLogEntryTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 30, 11, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtc = new(2026, 6, 30, 11, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateWithValidDataInitializesOpenDecision()
@@ -93,6 +94,19 @@ public class DecisionLogEntryTests
                 "Ignore customer_id",
                 "It is an identifier.",
                 CreatedAt));
+    }
+
+    [Fact]
+    public void CreateWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => DecisionLogEntry.Create(
+                DecisionLogEntryId.New(),
+                ProjectId.New(),
+                DecisionEntryType.Decision,
+                "Ignore customer_id",
+                "It is an identifier.",
+                NonUtc));
     }
 
     [Fact]
@@ -212,6 +226,18 @@ public class DecisionLogEntryTests
         Assert.Equal(DecisionStatus.Confirmed, entry.Status);
         Assert.Equal("Ignore customer_id", entry.Title);
         Assert.Equal(CreatedAt.AddMinutes(2), entry.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void UpdateWithNonUtcTimestampThrowsDomainExceptionAndLeavesStateUnchanged()
+    {
+        DecisionLogEntry entry = CreateEntry();
+
+        Assert.Throws<DomainException>(
+            () => entry.UpdateDetails("New title", "New rationale.", null, NonUtc.AddMinutes(1)));
+
+        Assert.Equal("Ignore customer_id", entry.Title);
+        Assert.Equal(CreatedAt, entry.UpdatedAtUtc);
     }
 
     private static DecisionLogEntry CreateEntry()

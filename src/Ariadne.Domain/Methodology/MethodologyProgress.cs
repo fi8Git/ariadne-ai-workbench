@@ -49,7 +49,10 @@ public sealed record MethodologyProgress
     }
 
     public static MethodologyProgress CreateForMvp(DateTimeOffset now)
-        => new(
+    {
+        now = DomainGuard.EnsureUtc(now, nameof(now));
+
+        return new MethodologyProgress(
             [
                 new MethodologyStepProgress(MethodologyStep.Project, MethodologyStepStatus.Completed, now, now),
                 new MethodologyStepProgress(MethodologyStep.Dataset, MethodologyStepStatus.NotStarted, now),
@@ -61,6 +64,7 @@ public sealed record MethodologyProgress
                 new MethodologyStepProgress(MethodologyStep.Evaluate, MethodologyStepStatus.NotAvailable, now),
                 new MethodologyStepProgress(MethodologyStep.Report, MethodologyStepStatus.NotStarted, now),
             ]);
+    }
 
     public bool TryGetStep(MethodologyStep step, out MethodologyStepProgress? progress)
         => _stepsByStep.TryGetValue(step, out progress);
@@ -71,6 +75,8 @@ public sealed record MethodologyProgress
         DateTimeOffset now,
         string? notes = null)
     {
+        now = DomainGuard.EnsureUtc(now, nameof(now));
+
         MethodologyStepProgress current = this[step];
         if (current.Status == MethodologyStepStatus.NotAvailable && status == MethodologyStepStatus.Completed)
             throw new DomainException("Not available methodology steps cannot be marked complete.");

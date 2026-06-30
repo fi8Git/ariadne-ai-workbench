@@ -11,6 +11,9 @@ public sealed record MethodologyStepProgress
         DateTimeOffset? completedAtUtc = null,
         string? notes = null)
     {
+        updatedAtUtc = DomainGuard.EnsureUtc(updatedAtUtc, nameof(updatedAtUtc));
+        completedAtUtc = DomainGuard.EnsureUtc(completedAtUtc, nameof(completedAtUtc));
+
         if (status == MethodologyStepStatus.Completed && completedAtUtc is null)
             throw new DomainException("Completed methodology steps require a completion timestamp.");
 

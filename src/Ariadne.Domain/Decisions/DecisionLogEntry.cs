@@ -17,6 +17,7 @@ public sealed class DecisionLogEntry : AggregateRoot<DecisionLogEntryId>
         : base(EnsureDecisionLogEntryId(id))
     {
         EnsureProjectId(projectId);
+        createdAtUtc = DomainGuard.EnsureUtc(createdAtUtc, nameof(createdAtUtc));
         EnsureDefined(type, "Decision entry type is not defined.");
         EnsureDefined(impact, "Decision impact is not defined.");
 
@@ -110,6 +111,8 @@ public sealed class DecisionLogEntry : AggregateRoot<DecisionLogEntryId>
 
     private void EnsureUpdateTimestamp(DateTimeOffset now)
     {
+        DomainGuard.EnsureUtc(now, nameof(now));
+
         if (now < UpdatedAtUtc)
             throw new DomainException("Updated timestamp cannot be before the last decision log update.");
     }

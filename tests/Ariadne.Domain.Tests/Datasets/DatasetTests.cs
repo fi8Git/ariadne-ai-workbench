@@ -7,6 +7,7 @@ namespace Ariadne.Domain.Tests.Datasets;
 public class DatasetTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 29, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtc = new(2026, 6, 29, 10, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateImportedCsvWithInitialVersionSucceeds()
@@ -46,6 +47,48 @@ public class DatasetTests
                 new DatasetName(" "),
                 CreateVersion(datasetId, 1, CreatedAt),
                 CreatedAt));
+    }
+
+    [Fact]
+    public void CreateImportedCsvWithDefaultDatasetIdThrowsDomainException()
+    {
+        DatasetId initialVersionDatasetId = DatasetId.New();
+
+        Assert.Throws<DomainException>(
+            () => Dataset.CreateImportedCsv(
+                default,
+                ProjectId.New(),
+                new DatasetName("Customers"),
+                CreateVersion(initialVersionDatasetId, 1, CreatedAt),
+                CreatedAt));
+    }
+
+    [Fact]
+    public void CreateImportedCsvWithDefaultProjectIdThrowsDomainException()
+    {
+        DatasetId datasetId = DatasetId.New();
+
+        Assert.Throws<DomainException>(
+            () => Dataset.CreateImportedCsv(
+                datasetId,
+                default,
+                new DatasetName("Customers"),
+                CreateVersion(datasetId, 1, CreatedAt),
+                CreatedAt));
+    }
+
+    [Fact]
+    public void CreateImportedCsvWithNonUtcTimestampThrowsDomainException()
+    {
+        DatasetId datasetId = DatasetId.New();
+
+        Assert.Throws<DomainException>(
+            () => Dataset.CreateImportedCsv(
+                datasetId,
+                ProjectId.New(),
+                new DatasetName("Customers"),
+                CreateVersion(datasetId, 1, CreatedAt),
+                NonUtc));
     }
 
     [Fact]
@@ -122,12 +165,41 @@ public class DatasetTests
     }
 
     [Fact]
+    public void AddVersionWithDefaultVersionIdThrowsDomainException()
+    {
+        Dataset dataset = CreateDataset();
+
+        Assert.Throws<DomainException>(
+            () => dataset.AddVersion(default, DatasetVersionTests.CreateFileReference(), CreatedAt.AddMinutes(10)));
+    }
+
+    [Fact]
+    public void AddVersionWithNonUtcTimestampThrowsDomainException()
+    {
+        Dataset dataset = CreateDataset();
+
+        Assert.Throws<DomainException>(
+            () => dataset.AddVersion(
+                DatasetVersionId.New(),
+                DatasetVersionTests.CreateFileReference(),
+                NonUtc.AddMinutes(10)));
+    }
+
+    [Fact]
     public void SetCurrentVersionRequiresKnownVersion()
     {
         Dataset dataset = CreateDataset();
 
         Assert.Throws<DomainException>(
             () => dataset.SetCurrentVersion(DatasetVersionId.New(), CreatedAt.AddMinutes(10)));
+    }
+
+    [Fact]
+    public void SetCurrentVersionWithDefaultVersionIdThrowsDomainException()
+    {
+        Dataset dataset = CreateDataset();
+
+        Assert.Throws<DomainException>(() => dataset.SetCurrentVersion(default, CreatedAt.AddMinutes(10)));
     }
 
     [Fact]
@@ -178,6 +250,17 @@ public class DatasetTests
             () => dataset.Rename(new DatasetName("Older"), CreatedAt.AddMinutes(5)));
 
         Assert.Equal("Updated", dataset.Name.Value);
+    }
+
+    [Fact]
+    public void UpdateWithNonUtcTimestampThrowsDomainException()
+    {
+        Dataset dataset = CreateDataset();
+
+        Assert.Throws<DomainException>(
+            () => dataset.Rename(new DatasetName("Updated"), NonUtc.AddMinutes(10)));
+
+        Assert.Equal("Customers", dataset.Name.Value);
     }
 
     private static Dataset CreateDataset(DatasetId? datasetId = null)

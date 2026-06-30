@@ -14,8 +14,11 @@ public sealed class Dataset : AggregateRoot<DatasetId>
         DataSourceKind sourceKind,
         DateTimeOffset now,
         string? description)
-        : base(id)
+        : base(DomainGuard.EnsureNotDefaultId(id, id.Value, "Dataset ID is required."))
     {
+        DomainGuard.EnsureNotDefaultId(projectId, projectId.Value, "Project ID is required.");
+        now = DomainGuard.EnsureUtc(now, nameof(now));
+
         if (sourceKind != DataSourceKind.CsvFile)
             throw new DomainException("Only CSV datasets are supported in the MVP.");
 
@@ -81,6 +84,7 @@ public sealed class Dataset : AggregateRoot<DatasetId>
         int? columnCount = null)
     {
         EnsureUpdateTimestamp(importedAtUtc);
+        DomainGuard.EnsureNotDefaultId(versionId, versionId.Value, "Dataset version ID is required.");
 
         if (_versions.Any(version => version.Id == versionId))
             throw new DomainException("Dataset version ID already exists in this dataset.");
@@ -105,6 +109,7 @@ public sealed class Dataset : AggregateRoot<DatasetId>
     public void SetCurrentVersion(DatasetVersionId versionId, DateTimeOffset now)
     {
         EnsureUpdateTimestamp(now);
+        DomainGuard.EnsureNotDefaultId(versionId, versionId.Value, "Dataset version ID is required.");
 
         if (!_versions.Any(version => version.Id == versionId))
             throw new DomainException("Current dataset version must exist in the dataset.");
@@ -145,6 +150,8 @@ public sealed class Dataset : AggregateRoot<DatasetId>
 
     private void EnsureUpdateTimestamp(DateTimeOffset now)
     {
+        DomainGuard.EnsureUtc(now, nameof(now));
+
         if (now < UpdatedAtUtc)
             throw new DomainException("Updated timestamp cannot be before the last dataset update.");
     }

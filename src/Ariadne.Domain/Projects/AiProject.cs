@@ -14,8 +14,10 @@ public sealed class AiProject : AggregateRoot<ProjectId>
         DateTimeOffset createdAtUtc,
         string? description,
         string? objective)
-        : base(id)
+        : base(DomainGuard.EnsureNotDefaultId(id, id.Value, "Project ID is required."))
     {
+        createdAtUtc = DomainGuard.EnsureUtc(createdAtUtc, nameof(createdAtUtc));
+
         Name = name ?? throw new DomainException("Project name is required.");
         Description = NormalizeOptionalText(description);
         Objective = NormalizeOptionalText(objective);
@@ -75,6 +77,7 @@ public sealed class AiProject : AggregateRoot<ProjectId>
     public void AttachDataset(DatasetId datasetId, DateTimeOffset now)
     {
         EnsureCanModify(now);
+        DomainGuard.EnsureNotDefaultId(datasetId, datasetId.Value, "Dataset ID is required.");
 
         if (_datasetIds.Contains(datasetId))
             return;
@@ -87,6 +90,8 @@ public sealed class AiProject : AggregateRoot<ProjectId>
     public void SetActiveDatasetVersion(DatasetVersionId datasetVersionId, DateTimeOffset now)
     {
         EnsureCanModify(now);
+        DomainGuard.EnsureNotDefaultId(datasetVersionId, datasetVersionId.Value, "Dataset version ID is required.");
+
         ActiveDatasetVersionId = datasetVersionId;
         Progress = Progress.WithStatus(MethodologyStep.Dataset, MethodologyStepStatus.InProgress, now);
         Touch(now);
@@ -127,8 +132,10 @@ public sealed class AiProject : AggregateRoot<ProjectId>
 
     private void EnsureUpdateTimestamp(DateTimeOffset now)
     {
-        if (now < CreatedAtUtc)
-            throw new DomainException("Updated timestamp cannot be before project creation.");
+        DomainGuard.EnsureUtc(now, nameof(now));
+
+        if (now < UpdatedAtUtc)
+            throw new DomainException("Updated timestamp cannot be before the last project update.");
     }
 
     private void EnsureActive()

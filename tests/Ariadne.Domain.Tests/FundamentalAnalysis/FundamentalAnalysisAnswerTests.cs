@@ -6,6 +6,7 @@ namespace Ariadne.Domain.Tests.FundamentalAnalysis;
 public class FundamentalAnalysisAnswerTests
 {
     private static readonly DateTimeOffset CreatedAt = new(2026, 6, 30, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset NonUtc = new(2026, 6, 30, 10, 0, 0, TimeSpan.FromHours(2));
 
     [Fact]
     public void CreateInitializesUnansweredQuestion()
@@ -52,6 +53,17 @@ public class FundamentalAnalysisAnswerTests
                 "what.variables",
                 "What do the variables represent?",
                 CreatedAt));
+    }
+
+    [Fact]
+    public void CreateWithNonUtcTimestampThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(
+            () => FundamentalAnalysisAnswer.Create(
+                FundamentalQuestionGroup.What,
+                "what.variables",
+                "What do the variables represent?",
+                NonUtc));
     }
 
     [Fact]
@@ -150,6 +162,18 @@ public class FundamentalAnalysisAnswerTests
         Assert.Equal(KnowledgeStatus.Known, answer.KnowledgeStatus);
         Assert.Equal("Rows are property sales.", answer.AnswerText);
         Assert.Equal(CreatedAt.AddMinutes(2), answer.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void UpdateWithNonUtcTimestampThrowsDomainExceptionAndLeavesStateUnchanged()
+    {
+        FundamentalAnalysisAnswer answer = CreateAnswer();
+
+        Assert.Throws<DomainException>(() => answer.MarkUnknown("Unknown.", NonUtc.AddMinutes(1)));
+
+        Assert.Equal(KnowledgeStatus.Unknown, answer.KnowledgeStatus);
+        Assert.False(answer.IsAddressed);
+        Assert.Null(answer.UpdatedAtUtc);
     }
 
     private static FundamentalAnalysisAnswer CreateAnswer()

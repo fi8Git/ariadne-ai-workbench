@@ -11,6 +11,8 @@ public sealed class FundamentalAnalysisAnswer : Entity<string>
         DateTimeOffset createdAtUtc)
         : base(NormalizeRequiredText(questionKey, "Question key is required."))
     {
+        createdAtUtc = DomainGuard.EnsureUtc(createdAtUtc, nameof(createdAtUtc));
+
         EnsureDefined(questionGroup, "Fundamental question group is not defined.");
 
         QuestionGroup = questionGroup;
@@ -90,6 +92,8 @@ public sealed class FundamentalAnalysisAnswer : Entity<string>
 
     private void EnsureUpdateTimestamp(DateTimeOffset now)
     {
+        DomainGuard.EnsureUtc(now, nameof(now));
+
         DateTimeOffset lastUpdate = UpdatedAtUtc ?? CreatedAtUtc;
 
         if (now < lastUpdate)

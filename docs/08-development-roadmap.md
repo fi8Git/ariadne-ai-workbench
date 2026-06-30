@@ -524,6 +524,8 @@ ListProjects
 AddDecisionLogEntry
 ```
 
+Detailed Codex task sequencing lives in `09-codex-task-breakdown.md`. When the roadmap and task breakdown differ on exact task boundaries, use `09-codex-task-breakdown.md` as the implementation-level source of truth.
+
 ### 11.3 Acceptance criteria
 
 - Domain tests cover entity creation and invariants.

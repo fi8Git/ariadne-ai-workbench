@@ -12,6 +12,8 @@ public sealed class VariableDefinition : Entity<ColumnName>
         DateTimeOffset now)
         : base(columnName ?? throw new DomainException("Column name is required."))
     {
+        now = DomainGuard.EnsureUtc(now, nameof(now));
+
         EnsureDefined(inferredPrimitiveType, "Primitive type is not defined.");
         EnsureDefined(inferredMethodologicalType, "Methodological type is not defined.");
 
@@ -178,6 +180,8 @@ public sealed class VariableDefinition : Entity<ColumnName>
 
     private void EnsureUpdateTimestamp(DateTimeOffset now)
     {
+        DomainGuard.EnsureUtc(now, nameof(now));
+
         if (now < UpdatedAtUtc)
             throw new DomainException("Updated timestamp cannot be before the last variable update.");
     }

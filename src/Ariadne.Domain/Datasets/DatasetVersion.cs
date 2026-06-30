@@ -13,8 +13,11 @@ public sealed class DatasetVersion : Entity<DatasetVersionId>
         long? rowCount = null,
         int? columnCount = null,
         IEnumerable<ParsingWarning>? parsingWarnings = null)
-        : base(id)
+        : base(DomainGuard.EnsureNotDefaultId(id, id.Value, "Dataset version ID is required."))
     {
+        DomainGuard.EnsureNotDefaultId(datasetId, datasetId.Value, "Dataset ID is required.");
+        importedAtUtc = DomainGuard.EnsureUtc(importedAtUtc, nameof(importedAtUtc));
+
         if (versionNumber <= 0)
             throw new DomainException("Dataset version number must be greater than zero.");
 
