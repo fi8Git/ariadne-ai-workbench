@@ -9,6 +9,6 @@ public partial class App : Microsoft.Maui.Controls.Application
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		return new Window(new MainPage()) { Title = "Ariadne.Maui" };
+		return new Window(new MainPage()) { Title = "Ariadne AI Workbench" };
 	}
 }

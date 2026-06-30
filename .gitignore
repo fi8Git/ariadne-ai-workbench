@@ -60,17 +60,17 @@ Desktop.ini
 *.provisionprofile
 
 # Ariadne local project data and sensitive generated artifacts
-.ariadne/
-ariadne-workspace/
-ariadne-projects/
-local-projects/
-datasets/
-data/original/
-data/preview/
-data/derived/
-reports/
-exports/
-backups/
+/.ariadne/
+/ariadne-workspace/
+/ariadne-projects/
+/local-projects/
+/datasets/
+/data/original/
+/data/preview/
+/data/derived/
+/reports/
+/exports/
+/backups/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
