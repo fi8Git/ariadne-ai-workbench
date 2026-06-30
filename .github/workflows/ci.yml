@@ -13,13 +13,35 @@ permissions:
   contents: read
 
 jobs:
-  non-maui-build-and-test:
-    name: Non-MAUI .NET build and tests
+  core-build-and-test:
+    name: Core .NET build and tests
     runs-on: ubuntu-latest
 
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "true"
+      DOTNET_CONFIGURATION: Release
+      CORE_PROJECTS: |
+        src/Ariadne.Domain/Ariadne.Domain.csproj
+        src/Ariadne.Application/Ariadne.Application.csproj
+        src/Ariadne.Analytics/Ariadne.Analytics.csproj
+        src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj
+        src/Ariadne.SharedUi/Ariadne.SharedUi.csproj
+        tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj
+        tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj
+        tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj
+        tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj
+      CORE_SOURCE_PROJECTS: |
+        src/Ariadne.Domain/Ariadne.Domain.csproj
+        src/Ariadne.Application/Ariadne.Application.csproj
+        src/Ariadne.Analytics/Ariadne.Analytics.csproj
+        src/Ariadne.Infrastructure.Local/Ariadne.Infrastructure.Local.csproj
+        src/Ariadne.SharedUi/Ariadne.SharedUi.csproj
+      CORE_TEST_PROJECTS: |
+        tests/Ariadne.Domain.Tests/Ariadne.Domain.Tests.csproj
+        tests/Ariadne.Application.Tests/Ariadne.Application.Tests.csproj
+        tests/Ariadne.Analytics.Tests/Ariadne.Analytics.Tests.csproj
+        tests/Ariadne.Infrastructure.Local.Tests/Ariadne.Infrastructure.Local.Tests.csproj
 
     steps:
       - name: Check out repository
@@ -30,11 +52,29 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore
-        run: dotnet restore Ariadne.NonMaui.slnf
+      - name: Restore core projects
+        shell: bash
+        run: |
+          while IFS= read -r project; do
+            if [[ -n "$project" ]]; then
+              dotnet restore "$project"
+            fi
+          done <<< "$CORE_PROJECTS"
 
-      - name: Build
-        run: dotnet build Ariadne.NonMaui.slnf --configuration Release --no-restore
+      - name: Build core source projects
+        shell: bash
+        run: |
+          while IFS= read -r project; do
+            if [[ -n "$project" ]]; then
+              dotnet build "$project" --configuration "$DOTNET_CONFIGURATION" --no-restore
+            fi
+          done <<< "$CORE_SOURCE_PROJECTS"
 
-      - name: Run tests
-        run: dotnet test Ariadne.NonMaui.slnf --configuration Release --no-build --verbosity normal
+      - name: Run core tests
+        shell: bash
+        run: |
+          while IFS= read -r project; do
+            if [[ -n "$project" ]]; then
+              dotnet test "$project" --configuration "$DOTNET_CONFIGURATION" --no-restore --verbosity normal
+            fi
+          done <<< "$CORE_TEST_PROJECTS"
